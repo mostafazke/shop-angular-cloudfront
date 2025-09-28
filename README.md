@@ -2,7 +2,14 @@
 
 Angular version: ~17.
 
-Repo maintainers:
+## Deployment Links
+
+- **CloudFront:**  
+  https://d8331wah0ee5g.cloudfront.net
+- **S3 website:**  
+  http://infrastack-myshopbucket3363d19f-8lsshra8r5zq.s3-website-us-east-1.amazonaws.com
+
+### Repo maintainers:
 
 - [Sergey Gultyayev](https://github.com/gultyayev)
 

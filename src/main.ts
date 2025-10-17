@@ -6,6 +6,7 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { CONFIG_TOKEN } from './app/core/injection-tokens/config.token';
 import { ErrorPrintInterceptor } from './app/core/interceptors/error-print.interceptor';
+import { AuthInterceptor } from './app/core/interceptors/auth.interceptor';
 import {
   HTTP_INTERCEPTORS,
   provideHttpClient,
@@ -15,6 +16,11 @@ import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { appRoutes } from './app/app-routes';
 
 const interceptors: Provider[] = [
+  {
+    provide: HTTP_INTERCEPTORS,
+    useClass: AuthInterceptor,
+    multi: true,
+  },
   {
     provide: HTTP_INTERCEPTORS,
     useClass: ErrorPrintInterceptor,

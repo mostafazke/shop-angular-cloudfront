@@ -9,7 +9,7 @@ import { Observable } from 'rxjs';
 import { AuthService } from '../auth.service';
 
 /**
- * HTTP Interceptor that adds Authorization header to import API requests
+ * HTTP Interceptor that adds Authorization header to import and cart API requests
  */
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
@@ -19,8 +19,8 @@ export class AuthInterceptor implements HttpInterceptor {
     request: HttpRequest<unknown>,
     next: HttpHandler,
   ): Observable<HttpEvent<unknown>> {
-    // Check if this is an import API request
-    if (this.isImportApiRequest(request.url)) {
+    // Check if this is an import or cart API request
+    if (this.requiresAuth(request.url)) {
       const token = this.authService.getToken();
 
       // Add Authorization header if token exists
@@ -38,9 +38,9 @@ export class AuthInterceptor implements HttpInterceptor {
   }
 
   /**
-   * Check if the request is to the import API endpoint
+   * Check if the request requires authentication
    */
-  private isImportApiRequest(url: string): boolean {
-    return url.includes('/import');
+  private requiresAuth(url: string): boolean {
+    return url.includes('/import') || url.includes('/api/profile/cart');
   }
 }

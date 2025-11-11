@@ -8,12 +8,22 @@ import { Injectable } from '@angular/core';
 })
 export class AuthService {
   private readonly TOKEN_KEY = 'authorization_token';
+  private readonly DEFAULT_TOKEN = 'eW91ckdpdGh1YkxvZ2luOlRFU1RfUEFTU1dPUkQ=';
+
+  constructor() {
+    // Initialize with default token if no token exists
+    if (!this.getToken()) {
+      this.setToken(this.DEFAULT_TOKEN);
+    }
+  }
 
   /**
    * Get the authorization token from localStorage
+   * Falls back to default token if none is stored
    */
   getToken(): string | null {
-    return localStorage.getItem(this.TOKEN_KEY);
+    const storedToken = localStorage.getItem(this.TOKEN_KEY);
+    return storedToken || this.DEFAULT_TOKEN;
   }
 
   /**

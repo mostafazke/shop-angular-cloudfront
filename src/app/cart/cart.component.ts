@@ -3,6 +3,7 @@ import {
   Component,
   computed,
   inject,
+  signal,
 } from '@angular/core';
 import { UntypedFormBuilder, Validators } from '@angular/forms';
 import { STEPPER_GLOBAL_OPTIONS } from '@angular/cdk/stepper';
@@ -21,6 +22,9 @@ import {
 import { MatCard, MatCardContent, MatCardTitle } from '@angular/material/card';
 import { AsyncPipe } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { NotificationService } from '../core/notification.service';
+import { ProductsService } from '../products/products.service';
+import { OrderAddress } from './cart-api.interface';
 
 @Component({
   selector: 'app-cart',
@@ -53,10 +57,14 @@ export class CartComponent {
   private readonly fb = inject(UntypedFormBuilder);
   private readonly checkoutService = inject(CheckoutService);
   private readonly cartService = inject(CartService);
+  private readonly notificationService = inject(NotificationService);
+  private readonly productsService = inject(ProductsService);
 
   products = toSignal(this.checkoutService.getProductsForCheckout(), {
     initialValue: [],
   });
+
+  isPlacingOrder = signal(false);
 
   totalPrice = computed(() => {
     const products = this.products();
@@ -89,10 +97,72 @@ export class CartComponent {
   }
 
   add(id: string): void {
-    this.cartService.addItem(id);
+    this.productsService.getProductById(id).subscribe({
+      next: (product) => {
+        if (product) {
+          this.cartService.addItem(product).subscribe({
+            error: (err) => {
+              this.notificationService.showError('Failed to add item to cart');
+              console.error('Error adding to cart:', err);
+            },
+          });
+        }
+      },
+      error: (err) => {
+        this.notificationService.showError('Failed to load product');
+        console.error('Error loading product:', err);
+      },
+    });
   }
 
   remove(id: string): void {
-    this.cartService.removeItem(id);
+    this.productsService.getProductById(id).subscribe({
+      next: (product) => {
+        if (product) {
+          this.cartService.removeItem(product).subscribe({
+            error: (err) => {
+              this.notificationService.showError(
+                'Failed to remove item from cart',
+              );
+              console.error('Error removing from cart:', err);
+            },
+          });
+        }
+      },
+      error: (err) => {
+        this.notificationService.showError('Failed to load product');
+        console.error('Error loading product:', err);
+      },
+    });
+  }
+
+  placeOrder(): void {
+    if (this.shippingInfo.invalid) {
+      this.notificationService.showError('Please fill in all required fields');
+      return;
+    }
+
+    this.isPlacingOrder.set(true);
+
+    const orderAddress: OrderAddress = {
+      address: this.shippingInfo.value.address,
+      comment: this.shippingInfo.value.comment || undefined,
+    };
+
+    this.checkoutService.checkout(orderAddress).subscribe({
+      next: (response) => {
+        this.isPlacingOrder.set(false);
+        this.notificationService.showSuccess(
+          `Order ${response.order.id} placed successfully!`,
+        );
+        this.cartService.empty();
+        this.shippingInfo.reset();
+      },
+      error: (err) => {
+        this.isPlacingOrder.set(false);
+        this.notificationService.showError('Failed to place order');
+        console.error('Error placing order:', err);
+      },
+    });
   }
 }

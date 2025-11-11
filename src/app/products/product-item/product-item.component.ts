@@ -76,11 +76,11 @@ export class ProductItemComponent {
   }
 
   add(): void {
-    this.#cartService.addItem(this.id);
+    this.#cartService.addItem(this.product()).subscribe();
   }
 
   remove(): void {
-    this.#cartService.removeItem(this.id);
+    this.#cartService.removeItem(this.product()).subscribe();
   }
 
   /** Move focus to a corresponding control when controls switch */

@@ -89,8 +89,22 @@
               <button class="text-uppercase" mat-button matStepperPrevious>
                 back
               </button>
-              <button color="primary" class="text-uppercase" mat-flat-button>
-                place order
+              <button
+                color="primary"
+                class="text-uppercase"
+                mat-flat-button
+                (click)="placeOrder()"
+                [disabled]="isPlacingOrder()"
+              >
+                @if (isPlacingOrder()) {
+                  <mat-spinner
+                    [diameter]="20"
+                    class="d-inline-block"
+                  ></mat-spinner>
+                  Placing order...
+                } @else {
+                  Place order
+                }
               </button>
             </div>
           </mat-step>

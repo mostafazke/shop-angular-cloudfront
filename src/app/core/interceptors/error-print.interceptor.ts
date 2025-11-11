@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import {
+  HttpErrorResponse,
   HttpEvent,
   HttpHandler,
   HttpInterceptor,
@@ -15,19 +16,24 @@ export class ErrorPrintInterceptor implements HttpInterceptor {
 
   intercept(
     request: HttpRequest<unknown>,
-    next: HttpHandler
+    next: HttpHandler,
   ): Observable<HttpEvent<unknown>> {
     return next.handle(request).pipe(
       tap({
-        error: () => {
+        error: (error: HttpErrorResponse) => {
           const url = new URL(request.url);
+          let errorMessage = `Request to "${url.pathname}" failed. Check the console for the details`;
 
-          this.notificationService.showError(
-            `Request to "${url.pathname}" failed. Check the console for the details`,
-            0
-          );
+          // Handle authorization errors with user-friendly messages
+          if (error.status === 401) {
+            errorMessage = 'Authorization header is missing. Please log in.';
+          } else if (error.status === 403) {
+            errorMessage = 'Invalid credentials. Access denied.';
+          }
+
+          this.notificationService.showError(errorMessage, 0);
         },
-      })
+      }),
     );
   }
 }

@@ -10,8 +10,8 @@
     "e2e": "ng e2e",
     "prepare": "husky",
     "lint:format": "npx --no-install lint-staged && npx --no-install pretty-quick --staged",
-    "synth": "cd infra && npm run build && cdk synth",
-    "deploy": "npm run build && cd infra && cdk deploy --require-approval never"
+    "synth": "cd infra && npm install && npm run build && cdk synth",
+    "deploy": "npm run build && cd infra && npm install && cdk deploy --require-approval never"
   },
   "private": true,
   "dependencies": {

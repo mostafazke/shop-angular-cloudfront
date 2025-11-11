@@ -1,14 +1,23 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { EMPTY, Observable } from 'rxjs';
 import { ApiService } from '../../core/api.service';
 import { switchMap } from 'rxjs/operators';
+import { AuthService } from 'src/app/core/auth.service';
 
 @Injectable()
 export class ManageProductsService extends ApiService {
+  private readonly authService = inject(AuthService);
   uploadProductsCSV(file: File): Observable<unknown> {
     if (!this.endpointEnabled('import')) {
       console.warn(
         'Endpoint "import" is disabled. To enable change your environment.ts config',
+      );
+      return EMPTY;
+    }
+
+    if (!this.authService.hasToken()) {
+      console.warn(
+        'Authorization token is missing. To enable change your environment.ts config',
       );
       return EMPTY;
     }
